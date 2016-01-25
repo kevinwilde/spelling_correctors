@@ -76,6 +76,53 @@ fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<&'a node::Node>, word:
 	}
 }
 
+#[cfg(test)]
+mod bk_tree_tests {
+
+	use std;
+	use node;
+	use super::BKTree;
+
+	#[test]
+	fn test_no_need_to_correct_word() {
+		let bk = small_fixture();
+		assert_eq!(bk.search("who", &1), "");
+	}
+
+	#[test]
+	fn test_no_suggestions_found() {
+		let bk = small_fixture();
+		assert_eq!(bk.search("asjkdghlaksjdghls", &1), "-");
+	}
+
+	#[test]
+	fn test_chooses_more_frequent_alternative() {
+		// ho should suggest who over how 
+		// since who has freq=2 while how has freq=1
+		let bk = small_fixture();
+		assert_eq!(bk.search("ho", &1), "who");
+	}
+
+	#[test]
+	fn test_correct_suggestion() {
+		let bk = small_fixture();
+		assert_eq!(bk.search("wherf", &1), "where");
+	}
+
+	fn small_fixture() -> BKTree {
+		let mut bk = BKTree{ root: node::Node{ word: "what".to_owned(), freq: 0, children: std::collections::HashMap::new() }};
+		bk.add("why");
+		bk.add("where");
+		bk.add("where");
+		bk.add("when");
+		bk.add("how");
+		bk.add("who");
+		bk.add("who");
+		bk
+	}
+
+}
+
 pub fn levenshtein_distance(w1: &str, w2: &str) -> usize {
 	let len1 = w1.len();
 	let len2 = w2.len();
