@@ -23,18 +23,32 @@ impl BKTree {
 		let mut v = Vec::new();
 		recursive_search(&self.root, &mut v, word, d);
 
-		let mut max_freq = 0;
-		let mut best_word = "-";
-		for node in &v {
-			if word == &node.word {
+		if v.len() == 0 {
+			return "-";
+		} else {
+
+			v.sort_by(|a, b|  {
+		        
+		        // Sort by distance
+		        if a.0 != b.0 {
+		            a.0.cmp(&b.0)
+		        }
+
+		        // If equal distance, sort by word frequency 
+		        else {
+		            b.1.freq.cmp(&a.1.freq)
+		        }
+		    });
+
+			// if there is an exact match (ie. dist == 0)
+			if v[0].0 == 0 {
 				return "";
 			}
-			if node.freq > max_freq {
-				max_freq = node.freq;
-				best_word = &node.word;
+
+			else {
+				return &v[0].1.word;
 			}
 		}
-		best_word
 	}
 
 }
@@ -52,14 +66,14 @@ fn traverse_tree(node: &mut node::Node, word: &str) {
 	}
 }
 
-fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<&'a node::Node>, word: &str, d: &usize) {
+fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<(usize, &'a node::Node)>, word: &str, d: &usize) {
 	let cur_dist = levenshtein_distance(&node.word, word);
-	if cur_dist == 0 {
-		v.clear();
-		assert!(v.len() == 0);
-		v.push(node);
-		return;
-	}
+	// if cur_dist == 0 {
+	// 	v.clear();
+	// 	assert!(v.len() == 0);
+	// 	v.push(node);
+	// 	return;
+	// }
 	let mut min_dist = 0;
 	if cur_dist > *d { // Check that cur_dist > d first to prevent usize from underflowing
 		min_dist = cur_dist - d;
@@ -67,7 +81,7 @@ fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<&'a node::Node>, word:
 	let max_dist = cur_dist + d;
 
 	if cur_dist <= *d {
-		v.push(&node);
+		v.push((cur_dist, &node));
 	}
 	for key in node.children.keys() {
 		if key >= &min_dist && key <= &max_dist {
@@ -123,7 +137,7 @@ mod bk_tree_tests {
 
 }
 
-pub fn levenshtein_distance(w1: &str, w2: &str) -> usize {
+fn levenshtein_distance(w1: &str, w2: &str) -> usize {
 	let len1 = w1.len();
 	let len2 = w2.len();
 
@@ -176,6 +190,11 @@ mod levenshtein_distance_tests {
 	#[test]
 	fn test_book_back() {
 		assert_eq!(levenshtein_distance("book", "back"), 2);
+	}
+
+	#[test]
+	fn test_world_wordl() {
+		assert_eq!(levenshtein_distance("world", "wordl"), 2);
 	}
 
 	#[test]
