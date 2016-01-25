@@ -16,28 +16,7 @@ pub struct BKTree {
 impl BKTree {
 	
 	pub fn add(&mut self, word: &str) {
-
 		traverse_tree(&mut self.root, word);
-		////Check for null root first?????
-		//if self.root.is_null() {
-		//	self.root = node::Node { word: word.to_owned(), freq: 1, children: std::collections::HashMap::new() };
-		//}
-
-		/*
-		// vvv ============================== ALMOST ================================== vvv
-		let mut cur_node = &mut self.root;
-		let mut dist = levenshtein_distance(&cur_node.word, word);
-		while cur_node.children.contains_key(&dist) {
-			if dist == 0 {
-				cur_node.freq += 1;
-				return;
-			}
-			cur_node = &mut cur_node.children.get_mut(&dist).expect("Impossible");
-			dist = levenshtein_distance(&cur_node.word, word);
-		}
-		cur_node.children.insert(dist, node::Node{ word: word.to_owned(), freq: 1, children: std::collections::HashMap::new() });
-		*/
-
 	}
 
 	pub fn search(&self, word: &str, d: &usize) -> &str {
@@ -45,8 +24,11 @@ impl BKTree {
 		recursive_search(&self.root, &mut v, word, d);
 
 		let mut max_freq = 0;
-		let mut best_word = "";
-		for node in v {
+		let mut best_word = "-";
+		for node in &v {
+			if word == &node.word {
+				return "";
+			}
 			if node.freq > max_freq {
 				max_freq = node.freq;
 				best_word = &node.word;
@@ -72,13 +54,14 @@ fn traverse_tree(node: &mut node::Node, word: &str) {
 
 fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<&'a node::Node>, word: &str, d: &usize) {
 	let cur_dist = levenshtein_distance(&node.word, word);
-	// if cur_dist == 0 {
-		//NO NEED TO CORRECT WORDS FOUND IN TREE
-	// }
-
+	if cur_dist == 0 {
+		v.clear();
+		assert!(v.len() == 0);
+		v.push(node);
+		return;
+	}
 	let mut min_dist = 0;
-	// Check that cur_dist > d first to prevent usize from underflowing
-	if cur_dist > *d {
+	if cur_dist > *d { // Check that cur_dist > d first to prevent usize from underflowing
 		min_dist = cur_dist - d;
 	}
 	let max_dist = cur_dist + d;
