@@ -68,12 +68,6 @@ fn traverse_tree(node: &mut node::Node, word: &str) {
 
 fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<(usize, &'a node::Node)>, word: &str, d: &usize) {
 	let cur_dist = levenshtein_distance(&node.word, word);
-	// if cur_dist == 0 {
-	// 	v.clear();
-	// 	assert!(v.len() == 0);
-	// 	v.push(node);
-	// 	return;
-	// }
 	let mut min_dist = 0;
 	if cur_dist > *d { // Check that cur_dist > d first to prevent usize from underflowing
 		min_dist = cur_dist - d;
