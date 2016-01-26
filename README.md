@@ -2,9 +2,9 @@
 
 Rust implementations of Norvig spelling corrector and BK Tree spelling corrector
 
-**Overview:**
+### Overview:
 
-*Norvig corrector:*
+**Norvig corrector:**
 
 Training Phase:
 - Read words from training file and stores them in a hashmap.
@@ -20,7 +20,7 @@ Correction Phase:
 
 *Edit distance: the number of edits it would take to turn one into the other, where an edit can be a deletion (remove one letter), a transposition (swap adjacent letters), an alteration (change one letter to another) or an insertion (add a letter).
 
-*BK Tree corrector:*
+**BK Tree corrector:**
 
 Training Phase:
 - Read words from a training file and construct a BK Tree from them.
@@ -35,7 +35,7 @@ Correction Phase:
 - Otherwise, choose the word with the lowest Levenshtein distance and highest frequency.
 
 
-**Performance:**
+### Performance:
 
 Based on running the programs on a few different files, it appears that the	Norvig spelling corrector goes through the training phase faster, but is slower at the correcting misspelled worse (particularly when the misspelled word is relatively long and requires going to the second level of edits in order to find a correction). The BK Tree is slower in the training phase, but faster at making corrections for misspelled words.
 
