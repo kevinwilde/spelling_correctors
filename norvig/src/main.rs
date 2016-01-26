@@ -30,10 +30,10 @@ fn main() {
 
 const ALPHABET: &'static str = "abcdefghijklmnopqrstuvwxyz";
 
-fn edits1(word: &str) -> Vec<String> {
+fn edits1(word: &str) -> Vec<String> {    
+    let mut v = Vec::new();
 	let word_len = word.len();
 	let mut splits = Vec::new();
-	let mut v = Vec::new();
 
 	for i in 0..(word_len+1) {
 		splits.push((&word[..i], &word[i..]));
@@ -80,113 +80,113 @@ fn edits1(word: &str) -> Vec<String> {
             }
 		}
 	}
-	v
+    v
 }
 
 #[cfg(test)]
-mod edit1_tests {
+mod edits1_tests {
 
     use super::{edits1};
 
     #[test]
     fn edits1_for_a() {
         let word = "a";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(78, v.len());
     }
 
     #[test]
     fn edits1_for_e() {
         let word = "e";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(78, v.len());
     }
 
     #[test]
     fn edits1_for_aaaaa() {
         let word = "aaaaa";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(278, v.len());
     }
 
     #[test]
     fn edits1_for_abc() {
         let word = "abc";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(182, v.len());
     }
 
     #[test]
     fn edits1_for_abcde() {
         let word = "abcde";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(286, v.len());
     }
 
     #[test]
     fn edits1_for_abcdefghijklmnopqrstuvwxyz() {
         let word = "abcdefghijklmnopqrstuvwxyz";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(1378, v.len());
     }
 
     #[test]
     fn edits1_for_hello() {
         let word = "hello";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(284, v.len());
     }
 
     #[test]
     fn edits1_for_something() {
         let word = "something";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(494, v.len());
     }
 
     #[test]
     fn edits1_for_anything() {
         let word = "anything";
-        let v = edits1(&word);
+        let v = edits1(word);
         assert_eq!(442, v.len());
     }
 
 }
 
-fn known(words: Vec<String>, word_library: &input::CountTable) -> Vec<String> {
-	let mut v = Vec::new();
-	for word in words {
-		if word_library.contains_key(&word) {
-			v.push(word);
-		}
-	}
-	v
+fn edits2(e1s: &Vec<String>) -> Vec<String> {
+    let mut v = Vec::new();
+    for e1 in e1s {
+        for e2 in edits1(&e1) {
+            v.push(e2);
+        }
+    }
+    v
 }
 
-fn known_edits2(word: &str, word_library: &input::CountTable) -> Vec<String> {
+fn known(words: &Vec<String>, word_library: &input::CountTable) -> Vec<(String, usize)> {
 	let mut v = Vec::new();
-	for e1 in edits1(word) {
-		for e2 in edits1(&e1) {
-			if word_library.contains_key(&e2) {
-				v.push(e2);
-			}
-		}
+	for word in words {
+        match word_library.get(word) {
+            Some(&freq) => v.push((word.to_owned(), freq)),
+            None => continue
+        }
 	}
 	v
 }
 
 fn correct(word: &str, word_library: &input::CountTable) -> String {
-    let mut candidates = known(edits1(word), word_library);
+    let e1s = edits1(word);
+    let mut candidates = known(&e1s, word_library);
     if candidates.len() <= 0 {
-        candidates = known_edits2(word, word_library);
+        candidates = known(&edits2(&e1s), word_library);
+        //candidates = known(&edits2(&edits1(word)), word_library);
     }
     let mut best_word: String = "-".to_owned();
     let mut best_word_score: usize = 0;
-    for word in &candidates {
-        let score = word_library.get(word).unwrap();
-        if  score > &best_word_score {
-            best_word = word.to_owned();
-            best_word_score = score.to_owned();
+    for pair in &candidates {
+        if  pair.1 > best_word_score {
+            best_word = pair.0.to_owned();
+            best_word_score = pair.1;
         }
     }
     best_word
