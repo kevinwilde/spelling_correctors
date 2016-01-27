@@ -26,7 +26,7 @@ Training Phase:
 - Read words from a training file and construct a BK Tree from them.
 - The first word becomes in the file is the root.
 - Each node stores the word and its frequency.
-- The edges are the Levenshtein distance between the adjacent nodes' words.
+- The edges are the [Levenshtein distance] (http://planetcalc.com/1721/) between the adjacent nodes' words.
 
 Correction Phase:
 - For each word in input, traverse the BK tree to find all words within a Levenshtein distance of 2 from the word.
