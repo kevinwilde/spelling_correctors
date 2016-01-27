@@ -39,7 +39,7 @@ but the Levenshtein distance between 'wordl' and 'world' is 2.
 use std::{env, fs};
 use std::io::stdin;
 
-mod node;
+//mod node;
 mod bktree;
 mod input;
 
@@ -51,7 +51,7 @@ fn main() {
     let f = fs::File::open(&args[1]).expect("Error opening the training file");
 
     let v: Vec<String> = input::read_input(f);
-    let root = node::Node{word: v[0].to_owned(), freq: 0, children: std::collections::HashMap::new()};
+    let root = bktree::Node{word: v[0].to_owned(), freq: 0, children: std::collections::HashMap::new()};
     let mut bk = bktree::BKTree{ root: root };
     for w in &v {
         bk.add(w);

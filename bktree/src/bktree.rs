@@ -3,17 +3,23 @@
 // EECS 395
 
 #[doc="
-BKTree struct
+BKTree
 In a BK tree, the nodes represent words and the edges are weighted with the 
 Levenshtein distance between adjacent nodes' words.
   root: the root node of the BK tree
 "]
 
 use std;
-use node;
+//use node;
+
+pub struct Node {
+	pub word: String,
+	pub freq: usize,
+	pub children: std::collections::HashMap<usize, Node>
+}
 
 pub struct BKTree {
-	pub root: node::Node
+	pub root: Node
 }
 
 impl BKTree {
@@ -56,7 +62,7 @@ impl BKTree {
 
 }
 
-fn traverse_tree(node: &mut node::Node, word: &str) {
+fn traverse_tree(node: &mut Node, word: &str) {
 	let dist = levenshtein_distance(&node.word, word);
 	if dist == 0 {
 		node.freq += 1;
@@ -65,11 +71,11 @@ fn traverse_tree(node: &mut node::Node, word: &str) {
 	if node.children.contains_key(&dist) {
 		traverse_tree(node.children.get_mut(&dist).expect("Impossible"), word);
 	} else {
-		node.children.insert(dist, node::Node{ word: word.to_owned(), freq: 1, children: std::collections::HashMap::new() });
+		node.children.insert(dist, Node{ word: word.to_owned(), freq: 1, children: std::collections::HashMap::new() });
 	}
 }
 
-fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<(usize, &'a node::Node)>, word: &str, d: &usize) {
+fn recursive_search<'a>(node: &'a Node, v: &mut Vec<(usize, &'a Node)>, word: &str, d: &usize) {
 	let cur_dist = levenshtein_distance(&node.word, word);
 	let mut min_dist = 0;
 	if cur_dist > *d { // Check that cur_dist > d first to prevent usize from underflowing
@@ -91,7 +97,7 @@ fn recursive_search<'a>(node: &'a node::Node, v: &mut Vec<(usize, &'a node::Node
 mod bk_tree_tests {
 
 	use std;
-	use node;
+	use super::Node;
 	use super::BKTree;
 
 	#[test]
@@ -121,7 +127,7 @@ mod bk_tree_tests {
 	}
 
 	fn small_fixture() -> BKTree {
-		let mut bk = BKTree{ root: node::Node{ word: "what".to_owned(), freq: 0, children: std::collections::HashMap::new() }};
+		let mut bk = BKTree{ root: Node{ word: "what".to_owned(), freq: 0, children: std::collections::HashMap::new() }};
 		bk.add("why");
 		bk.add("where");
 		bk.add("where");
