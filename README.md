@@ -34,6 +34,9 @@ Correction Phase:
 - If the word itself is found (ie. Levenshtein distance is 0), no correction is necessary.
 - Otherwise, choose the word with the lowest Levenshtein distance and highest frequency.
 
+### Behavior:
+
+For the vast majority of misspellings, the Norvig corrector and the BK Tree corrector will produce the same suggested correction. However, the behavior of the BK Tree  corrector is slightly different from the Norvig corrector because of the use of Levenshtein distance rather than edit distance. In particular, transposing letters adds 2 to the Levenshtein distance, whereas it only adds 1 to the edit distance. Thus, in the case where the Norvig corrector suggests a correction of transposing two letters for an edit distance of 1, the BK tree corrector might suggest a different correction with a Levenshtein distance of 1. For example, when [this file] (http://www.gutenberg.org/cache/epub/1342/pg1342.txt) is used as the training file, the BK Tree corrector will suggest that 'fera' be corrected to 'her'. The Norvig corrector, though, will suggest that 'fera' be corrected to 'fear'. In this case, the edit distance from 'fera' to 'fear' is 1 (transpose a and r) but the Levenshtein distance is 2. Therefore, the Norvig corrector chooses the most common word of edit distance 1 ('fear'), but the BK Tree corrector does not find any corrections of Levenshtein distance 1, so it chooses the most common word of Levenshtein distance 2 ('her').
 
 ### Performance:
 
