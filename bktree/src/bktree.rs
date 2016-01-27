@@ -3,7 +3,10 @@
 // EECS 395
 
 #[doc="
-
+BKTree struct
+In a BK tree, the nodes represent words and the edges are weighted with the 
+Levenshtein distance between adjacent nodes' words.
+  root: the root node of the BK tree
 "]
 
 use std;

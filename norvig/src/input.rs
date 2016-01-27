@@ -3,8 +3,15 @@
 // EECS 395
 
 #[doc="
-
+Words do not include any characters except alphabetic characters and apostrophes and periods (to allow acronyms).
+The program is not case sensitive (all words are converted to lowercase). `Hello` and `hello` count as the same word.
+Numbers are not words.
+Apostrophes are part of words as long as they are not at the beginning or end. 
+Periods are trimmed from the beginning and end of words. Abbreviations like `etc.` will be counted as just `etc`.
+Acronyms separated by periods will have the last period removed (ex. `E.E.C.S.` would show up in the output as `e.e.c.s`).
+Hyphenated words are split into separate words. Thus, `good-looking` would separate into `good` and `looking`.
 "]
+
 use std;
 use std::io::{BufRead, BufReader, Read};
 
