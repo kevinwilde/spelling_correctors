@@ -20,7 +20,7 @@ use std::io::{BufRead, BufReader, Read};
 pub type CountTable = std::collections::HashMap<String, usize>;
 
 pub fn read_and_count(map: &mut CountTable, file: std::fs::File) {
-    let v: Vec<String> = read_input(file);    
+    let v: Vec<String> = read_input(file);
     for w in v {
         increment_word(map, w);
     }
@@ -53,7 +53,7 @@ pub fn read_input<R: Read>(reader: R) -> Vec<String> {
             }
             
             if word.len() > 0 {
-                v.push(word.to_owned());
+                v.push(word.to_string());
             }
         }
     }
@@ -104,7 +104,7 @@ mod read_input_tests {
     }
 
     fn assert_read(expected: &[&str], input: &str) {
-        let mock_read = StringReader::new(input.to_owned());
+        let mock_read = StringReader::new(input.to_string());
         let v = read_input(mock_read);
         assert_eq!(expected.len(), v.len());
         for i in 0..(v.len()) {
@@ -147,7 +147,7 @@ mod increment_word_tests {
     #[test]
     fn insert_if_empty() {
         let mut h = CountTable::new();
-        increment_word(&mut h, "one".to_owned());
+        increment_word(&mut h, "one".to_string());
 
         assert_eq!(Some(&1), h.get("one"));
         assert_eq!(1, h.len());
@@ -158,8 +158,8 @@ mod increment_word_tests {
         let mut under_test = fixture();
         let mut expected = fixture();
 
-        increment_word(&mut under_test, "three".to_owned());
-        expected.insert("three".to_owned(), 4);
+        increment_word(&mut under_test, "three".to_string());
+        expected.insert("three".to_string(), 4);
         assert_eq!(expected, under_test);
     }
 
@@ -168,15 +168,15 @@ mod increment_word_tests {
         let mut under_test = fixture();
         let mut expected = fixture();
 
-        increment_word(&mut under_test, "one".to_owned());
-        expected.insert("one".to_owned(), 1);
+        increment_word(&mut under_test, "one".to_string());
+        expected.insert("one".to_string(), 1);
         assert_eq!(expected, under_test);
     }
 
     fn fixture() -> CountTable {
         let mut h = CountTable::new();
-        h.insert("two".to_owned(), 2);
-        h.insert("three".to_owned(), 3);
+        h.insert("two".to_string(), 2);
+        h.insert("three".to_string(), 3);
         
         assert_eq!(None, h.get("one"));
         assert_eq!(Some(&2), h.get("two"));

@@ -23,7 +23,7 @@ fn edits1(word: &str) -> Vec<String> {
     //Deletes
     for t in &splits {
         if t.1.len() > 0 {
-            let new_edit = t.0.to_owned() + &t.1[1..];
+            let new_edit = t.0.to_string() + &t.1[1..];
             if !v.contains(&new_edit) {
                 v.push(new_edit);
             }
@@ -33,7 +33,7 @@ fn edits1(word: &str) -> Vec<String> {
     //Transposes
     for t in &splits {
         if t.1.len() > 1 {
-            let new_edit = t.0.to_owned() + &t.1[1..2] + &t.1[0..1] + &t.1[2..];
+            let new_edit = t.0.to_string() + &t.1[1..2] + &t.1[0..1] + &t.1[2..];
             if !v.contains(&new_edit) {
                 v.push(new_edit);
             }
@@ -44,7 +44,7 @@ fn edits1(word: &str) -> Vec<String> {
     for t in &splits {
         if t.1.len() > 0 {
             for i in 0..ALPHABET.len() {
-                let new_edit = t.0.to_owned() + &ALPHABET[i..(i+1)] + &t.1[1..];
+                let new_edit = t.0.to_string() + &ALPHABET[i..(i+1)] + &t.1[1..];
                 if !v.contains(&new_edit) {
                     v.push(new_edit);
                 }
@@ -55,7 +55,7 @@ fn edits1(word: &str) -> Vec<String> {
     //Inserts
     for t in &splits {
         for i in 0..ALPHABET.len() {
-            let new_edit = t.0.to_owned() + &ALPHABET[i..(i+1)] + &t.1[..];
+            let new_edit = t.0.to_string() + &ALPHABET[i..(i+1)] + &t.1[..];
             if !v.contains(&new_edit) {
                 v.push(new_edit);
             }
@@ -78,7 +78,7 @@ fn known(words: &Vec<String>, word_library: &input::CountTable) -> Vec<(String, 
     let mut v = Vec::new();
     for word in words {
         match word_library.get(word) {
-            Some(&freq) => v.push((word.to_owned(), freq)),
+            Some(&freq) => v.push((word.to_string(), freq)),
             None => continue
         }
     }
@@ -91,11 +91,11 @@ pub fn correct(word: &str, word_library: &input::CountTable) -> String {
     if candidates.len() <= 0 {
         candidates = known(&edits2(&e1s), word_library);
     }
-    let mut best_word: String = "-".to_owned();
+    let mut best_word: String = "-".to_string();
     let mut best_word_score: usize = 0;
     for pair in &candidates {
         if  pair.1 > best_word_score {
-            best_word = pair.0.to_owned();
+            best_word = pair.0.to_string();
             best_word_score = pair.1;
         }
     }
@@ -116,7 +116,7 @@ mod edits1_tests {
                           "ad", "ae", "af", "ax", "ay", "az", "ab", "ac", "ad",
                           "ae", "af", "ax", "ay", "az"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -129,7 +129,7 @@ mod edits1_tests {
                           "ef", "ex", "ey", "ez", "eb", "ec", "ed", "ee", "ef",
                           "ex", "ey", "ez"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -141,7 +141,7 @@ mod edits1_tests {
         let subset = vec!["aaaa", "aaaaaa", "aaaab", "aacaa", "aaadaa",
                           "faaaaa", "axaaaa", "aaaaya", "azaaa"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -160,7 +160,7 @@ mod edits1_tests {
         let subset = vec!["abcd", "abde", "cbcde", "abcze", "abcdef", "yabcde",
                           "bcde", "atcde", "bacde"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -174,7 +174,7 @@ mod edits1_tests {
                           "abcdefghijklmnopqrstuvwxyza",
                           "abcdeaghijklmnopqrstuvwxyz"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -186,7 +186,7 @@ mod edits1_tests {
         let subset = vec!["helloh", "yello", "hlelo", "helol", "ahello",
                           "helo", "jello"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -197,7 +197,7 @@ mod edits1_tests {
         assert_eq!(494, v.len());
         let subset = vec!["somthing", "somdthing", "aomething", "somehting"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -208,7 +208,7 @@ mod edits1_tests {
         assert_eq!(442, v.len());
         let subset = vec!["anzthing", "anyting", "antyhing", "manything"];
         for word in subset {
-            assert!(v.contains(&word.to_owned()));
+            assert!(v.contains(&word.to_string()));
         }
     }
 
@@ -223,7 +223,7 @@ mod correct_tests {
     #[test]
     fn test_no_suggestions_found() {
         let lib = fixture();
-        assert_eq!(correct("asjkdghlaksjdghls", &lib), "-".to_owned());
+        assert_eq!(correct("asjkdghlaksjdghls", &lib), "-".to_string());
     }
 
     #[test]
@@ -231,24 +231,24 @@ mod correct_tests {
         // ho should suggest who over how 
         // since who has freq=2 while how has freq=1
         let lib = fixture();
-        assert_eq!(correct("ho", &lib), "who".to_owned());
+        assert_eq!(correct("ho", &lib), "who".to_string());
     }
 
     #[test]
     fn test_correct_suggestion() {
         let lib = fixture();
-        assert_eq!(correct("wherf", &lib), "where".to_owned());
+        assert_eq!(correct("wherf", &lib), "where".to_string());
     }
 
     fn fixture() -> input::CountTable {
         let mut h = input::CountTable::new();
-        h.insert("two".to_owned(), 2);
-        h.insert("three".to_owned(), 3);
-        h.insert("why".to_owned(), 1);
-        h.insert("where".to_owned(), 2);
-        h.insert("when".to_owned(), 1);
-        h.insert("how".to_owned(), 1);
-        h.insert("who".to_owned(), 2);
+        h.insert("two".to_string(), 2);
+        h.insert("three".to_string(), 3);
+        h.insert("why".to_string(), 1);
+        h.insert("where".to_string(), 2);
+        h.insert("when".to_string(), 1);
+        h.insert("how".to_string(), 1);
+        h.insert("who".to_string(), 2);
         
         assert_eq!(None, h.get("none"));
         assert_eq!(Some(&2), h.get("two"));
