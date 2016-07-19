@@ -1,15 +1,17 @@
-// Kevin Wilde
-// NETID: kjw731
-// EECS 395
-
 #[doc="
-Words do not include any characters except alphabetic characters and apostrophes and periods (to allow acronyms).
-The program is not case sensitive (all words are converted to lowercase). `Hello` and `hello` count as the same word.
-Numbers are not words.
-Apostrophes are part of words as long as they are not at the beginning or end. 
-Periods are trimmed from the beginning and end of words. Abbreviations like `etc.` will be counted as just `etc`.
-Acronyms separated by periods will have the last period removed (ex. `E.E.C.S.` would show up in the output as `e.e.c.s`).
-Hyphenated words are split into separate words. Thus, `good-looking` would separate into `good` and `looking`.
+* Words do not include any characters except alphabetic characters and
+  apostrophes and periods (to allow acronyms).
+* The program is not case sensitive (all words are converted to lowercase).
+  Thus, `Hello` and `hello` count as the same word.
+* Numbers are not words.
+* Apostrophes are part of words as long as they are not at the beginning or
+  end. 
+* Periods are trimmed from the beginning and end of words. Abbreviations like
+  `etc.` will be counted as just `etc`.
+  Acronyms separated by periods will have the last period removed
+  (ex. `E.E.C.S.` would show up in the output as `e.e.c.s`).
+* Hyphenated words are split into separate words. Thus, `good-looking` would
+  separate into `good` and `looking`.
 "]
 
 use std;
@@ -29,19 +31,23 @@ pub fn read_input<R: Read>(reader: R) -> Vec<String> {
     let mut lines = BufReader::new(reader).lines();
     while let Some(Ok(line)) = lines.next() {
         let lower_line = line.to_lowercase();
-        let tmp: Vec<&str> = lower_line.split(|c: char| !c.is_alphabetic() && c != '\'' && c != '.').collect();
-        for elem in tmp {            
+        let tmp: Vec<&str> = lower_line.split(
+                |c: char| !c.is_alphabetic() && c != '\'' && c != '.'
+            ).collect();
+        for elem in tmp {
             let mut word = &elem[..];
             let mut size = word.len();
 
             // Remove leading apostrophes and periods
-            while size > 0 && (word.chars().nth(0).unwrap() == '\'' || word.chars().nth(0).unwrap() == '.') {
+            while size > 0 && (word.chars().nth(0).unwrap() == '\''
+                                || word.chars().nth(0).unwrap() == '.') {
                 word = &word[1..];
                 size -= 1;
             }
 
             // Remove trailing apostrophes and periods
-            while size > 0 && (word.chars().nth(size-1).unwrap() == '\'' || word.chars().nth(size-1).unwrap() == '.') {
+            while size > 0 && (word.chars().nth(size-1).unwrap() == '\''
+                                || word.chars().nth(size-1).unwrap() == '.') {
                 word = &word[..(size-1)];
                 size -= 1;
             }
@@ -52,6 +58,10 @@ pub fn read_input<R: Read>(reader: R) -> Vec<String> {
         }
     }
     v
+}
+
+fn increment_word(map: &mut CountTable, word: String) {
+    *map.entry(word).or_insert(0) += 1;
 }
 
 #[cfg(test)]
@@ -71,22 +81,26 @@ mod read_input_tests {
 
     #[test]
     fn trims_beginning_and_trailing_apostrophes_and_periods() {
-        assert_read(&["hi", "hello", "hey"], "'...''hi...\n''...'..'hello...'\n'..'..'.hey\n");
+        assert_read(&["hi", "hello", "hey"],
+            "'...''hi...\n''...'..'hello...'\n'..'..'.hey\n");
     }
 
     #[test]
     fn handles_acronyms() {
-        assert_read(&["i", "am", "a", "student", "in", "the", "e.e.c.s", "department"], "I am a student \nin the E.E.C.S. department!!\n");
+        assert_read(&["i", "am", "a", "student", "in", "the", "e.e.c.s", "department"],
+            "I am a student \nin the E.E.C.S. department!!\n");
     }
 
     #[test]
     fn splits_on_invalid_chars() {
-        assert_read(&["hi", "my", "name", "is", "kevin", "i", "don't", "like", "the", "one"], "hi8 my name&is Kevin. I don't like the # 3.14159. One=1.")
+        assert_read(&["hi", "my", "name", "is", "kevin", "i", "don't", "like", "the", "one"],
+            "hi8 my name&is Kevin. I don't like the # 3.14159. One=1.")
     }
 
     #[test]
     fn splits_on_invalid_chars_multi_line() {
-        assert_read(&["hi", "my", "name", "is", "kevin", "i", "don't", "like", "the", "one"], "hi8 my\nname&is Kevin!!!!\n I don't\nlike the # 3. One=1.\n%$#^$^")
+        assert_read(&["hi", "my", "name", "is", "kevin", "i", "don't", "like", "the", "one"],
+            "hi8 my\nname&is Kevin!!!!\n I don't\nlike the # 3. One=1.\n%$#^$^")
     }
 
     fn assert_read(expected: &[&str], input: &str) {
@@ -123,10 +137,6 @@ mod read_input_tests {
             Ok(count)
         }
     }
-}
-
-fn increment_word(map: &mut CountTable, word: String) {
-    *map.entry(word).or_insert(0) += 1;
 }
 
 #[cfg(test)]

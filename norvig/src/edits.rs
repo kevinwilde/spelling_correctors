@@ -1,86 +1,120 @@
-// Kevin Wilde
-// NETID: kjw731
-// EECS 395
-
 #[doc="
 Provides functions to
-    compute the possible edits to a word, where an edit can be a deletion (remove one letter), 
-    a transposition (swap adjacent letters), an alteration (change one letter to another) or an 
-    insertion (add a letter).
-
-    Check if word is known (ie. found in training file)
-
-    Suggest best correction to misspelled words
+  * Compute the possible edits to a word, where an edit can be a deletion
+    (remove one letter), a transposition (swap adjacent letters), an alteration
+    (change one letter to another) or an insertion (add a letter).
+  * Check if word is known (ie. found in training file)
+  * Suggest best correction to misspelled words
 "]
 
 use input;
 
 const ALPHABET: &'static str = "abcdefghijklmnopqrstuvwxyz";
 
-fn edits1(word: &str) -> Vec<String> {    
+fn edits1(word: &str) -> Vec<String> {
     let mut v = Vec::new();
-	let word_len = word.len();
-	let mut splits = Vec::new();
+    let word_len = word.len();
+    let mut splits = Vec::new();
 
-	for i in 0..(word_len+1) {
-		splits.push((&word[..i], &word[i..]));
-	}
+    for i in 0..(word_len+1) {
+        splits.push((&word[..i], &word[i..]));
+    }
 
-	//Deletes
-	for t in &splits {		
-		if t.1.len() > 0 {
-			let new_edit = t.0.to_owned() + &t.1[1..];
+    //Deletes
+    for t in &splits {
+        if t.1.len() > 0 {
+            let new_edit = t.0.to_owned() + &t.1[1..];
             if !v.contains(&new_edit) {
                 v.push(new_edit);
             }
-		}
-	}
+        }
+    }
 
-	//Transposes
-	for t in &splits {
-		if t.1.len() > 1 {
+    //Transposes
+    for t in &splits {
+        if t.1.len() > 1 {
             let new_edit = t.0.to_owned() + &t.1[1..2] + &t.1[0..1] + &t.1[2..];
             if !v.contains(&new_edit) {
-				v.push(new_edit);
+                v.push(new_edit);
             }
-		}
-	}
+        }
+    }
 
-	//Replaces
-	for t in &splits {
-		if t.1.len() > 0 {
-			for i in 0..ALPHABET.len() {
+    //Replaces
+    for t in &splits {
+        if t.1.len() > 0 {
+            for i in 0..ALPHABET.len() {
                 let new_edit = t.0.to_owned() + &ALPHABET[i..(i+1)] + &t.1[1..];
                 if !v.contains(&new_edit) {
-    				v.push(new_edit);
+                    v.push(new_edit);
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 
-	//Inserts
-	for t in &splits {
-		for i in 0..ALPHABET.len() {
-			let new_edit = t.0.to_owned() + &ALPHABET[i..(i+1)] + &t.1[..];
+    //Inserts
+    for t in &splits {
+        for i in 0..ALPHABET.len() {
+            let new_edit = t.0.to_owned() + &ALPHABET[i..(i+1)] + &t.1[..];
             if !v.contains(&new_edit) {
                 v.push(new_edit);
             }
-		}
-	}
+        }
+    }
     v
+}
+
+fn edits2(e1s: &Vec<String>) -> Vec<String> {
+    let mut v = Vec::new();
+    for e1 in e1s {
+        for e2 in edits1(&e1) {
+            v.push(e2);
+        }
+    }
+    v
+}
+
+fn known(words: &Vec<String>, word_library: &input::CountTable) -> Vec<(String, usize)> {
+    let mut v = Vec::new();
+    for word in words {
+        match word_library.get(word) {
+            Some(&freq) => v.push((word.to_owned(), freq)),
+            None => continue
+        }
+    }
+    v
+}
+
+pub fn correct(word: &str, word_library: &input::CountTable) -> String {
+    let e1s = edits1(word);
+    let mut candidates = known(&e1s, word_library);
+    if candidates.len() <= 0 {
+        candidates = known(&edits2(&e1s), word_library);
+    }
+    let mut best_word: String = "-".to_owned();
+    let mut best_word_score: usize = 0;
+    for pair in &candidates {
+        if  pair.1 > best_word_score {
+            best_word = pair.0.to_owned();
+            best_word_score = pair.1;
+        }
+    }
+    best_word
 }
 
 #[cfg(test)]
 mod edits1_tests {
 
-    use super::{edits1};
+    use super::edits1;
 
     #[test]
     fn edits1_for_a() {
         let word = "a";
         let v = edits1(word);
         assert_eq!(78, v.len());
-        let subset = vec!["b", "c", "d", "e", "f", "x", "y", "z", "ab", "ac", "ad", "ae", "af", "ax", "ay", "az", "ab", "ac", "ad", "ae", "af", "ax", "ay", "az"];
+        let subset = vec!["b", "c", "d", "e", "f", "x", "y", "z", "ab", "ac",
+                          "ad", "ae", "af", "ax", "ay", "az", "ab", "ac", "ad",
+                          "ae", "af", "ax", "ay", "az"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -91,7 +125,9 @@ mod edits1_tests {
         let word = "e";
         let v = edits1(word);
         assert_eq!(78, v.len());
-        let subset = vec!["b", "c", "d", "f", "x", "y", "z", "eb", "ec", "ed", "ef", "ex", "ey", "ez", "eb", "ec", "ed", "ee", "ef", "ex", "ey", "ez"];
+        let subset = vec!["b", "c", "d", "f", "x", "y", "z", "eb", "ec", "ed",
+                          "ef", "ex", "ey", "ez", "eb", "ec", "ed", "ee", "ef",
+                          "ex", "ey", "ez"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -102,7 +138,8 @@ mod edits1_tests {
         let word = "aaaaa";
         let v = edits1(word);
         assert_eq!(278, v.len());
-        let subset = vec!["aaaa", "aaaaaa", "aaaab", "aacaa", "aaadaa", "faaaaa", "axaaaa", "aaaaya", "azaaa"];
+        let subset = vec!["aaaa", "aaaaaa", "aaaab", "aacaa", "aaadaa",
+                          "faaaaa", "axaaaa", "aaaaya", "azaaa"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -120,7 +157,8 @@ mod edits1_tests {
         let word = "abcde";
         let v = edits1(word);
         assert_eq!(286, v.len());
-        let subset = vec!["abcd", "abde", "cbcde", "abcze", "abcdef", "yabcde", "bcde", "atcde", "bacde"];
+        let subset = vec!["abcd", "abde", "cbcde", "abcze", "abcdef", "yabcde",
+                          "bcde", "atcde", "bacde"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -131,7 +169,10 @@ mod edits1_tests {
         let word = "abcdefghijklmnopqrstuvwxyz";
         let v = edits1(word);
         assert_eq!(1378, v.len());
-        let subset = vec!["abcdefhijklmnopqrstuvwxyz", "abcdefghikjlmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", "abcdeaghijklmnopqrstuvwxyz"];
+        let subset = vec!["abcdefhijklmnopqrstuvwxyz",
+                          "abcdefghikjlmnopqrstuvwxyz",
+                          "abcdefghijklmnopqrstuvwxyza",
+                          "abcdeaghijklmnopqrstuvwxyz"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -142,7 +183,8 @@ mod edits1_tests {
         let word = "hello";
         let v = edits1(word);
         assert_eq!(284, v.len());
-        let subset = vec!["helloh", "yello", "hlelo", "helol", "ahello", "helo"];
+        let subset = vec!["helloh", "yello", "hlelo", "helol", "ahello",
+                          "helo", "jello"];
         for word in subset {
             assert!(v.contains(&word.to_owned()));
         }
@@ -170,44 +212,6 @@ mod edits1_tests {
         }
     }
 
-}
-
-fn edits2(e1s: &Vec<String>) -> Vec<String> {
-    let mut v = Vec::new();
-    for e1 in e1s {
-        for e2 in edits1(&e1) {
-            v.push(e2);
-        }
-    }
-    v
-}
-
-fn known(words: &Vec<String>, word_library: &input::CountTable) -> Vec<(String, usize)> {
-	let mut v = Vec::new();
-	for word in words {
-        match word_library.get(word) {
-            Some(&freq) => v.push((word.to_owned(), freq)),
-            None => continue
-        }
-	}
-	v
-}
-
-pub fn correct(word: &str, word_library: &input::CountTable) -> String {
-    let e1s = edits1(word);
-    let mut candidates = known(&e1s, word_library);
-    if candidates.len() <= 0 {
-        candidates = known(&edits2(&e1s), word_library);
-    }
-    let mut best_word: String = "-".to_owned();
-    let mut best_word_score: usize = 0;
-    for pair in &candidates {
-        if  pair.1 > best_word_score {
-            best_word = pair.0.to_owned();
-            best_word_score = pair.1;
-        }
-    }
-    best_word
 }
 
 #[cfg(test)]
