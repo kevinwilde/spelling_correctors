@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Spelling Correctors by kevinwilde</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Spelling Correctors</h1>
+        <h2></h2>
+        <a href="https://github.com/kevinwilde/spelling_correctors" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p>Rust implementations of Norvig spelling corrector and BK Tree spelling corrector</p>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview:</h2>
+
+<p><strong>Norvig corrector:</strong></p>
+
+<p>Training Phase:</p>
+
+<ul>
+<li>Read words from training file and stores them in a hashmap.</li>
+<li>Each time a word is seen, it's frequency is incremented.</li>
+</ul>
+
+<p>Correction Phase:</p>
+
+<ul>
+<li>For each word in input, if the word is in the hashmap, no correction is necessary.</li>
+<li>Otherwise, all possible words of edit distance 1* are checked for in the hashmap.</li>
+<li>If it finds any of these in the hashmap, it chooses the one with the highest frequency.</li>
+<li>If none are found in the hashmap, all words of edit distance 2 checked for in the hashmap.</li>
+<li>If it finds any of these in the hashmap, it chooses the one with the highest frequency.</li>
+<li>If still none are found, it does not make any suggestions for correcting the word.</li>
+</ul>
+
+<p>*Edit distance: the number of edits it would take to turn one into the other, where an edit can be a deletion (remove one letter), a transposition (swap adjacent letters), an alteration (change one letter to another) or an insertion (add a letter).</p>
+
+<p><strong>BK Tree corrector:</strong></p>
+
+<p>Training Phase:</p>
+
+<ul>
+<li>Read words from a training file and construct a BK Tree from them.</li>
+<li>The first word becomes in the file is the root.</li>
+<li>Each node stores the word and its frequency.</li>
+<li>The edges are the <a href="http://planetcalc.com/1721/">Levenshtein distance</a> between the adjacent nodes' words.</li>
+</ul>
+
+<p>Correction Phase:</p>
+
+<ul>
+<li>For each word in input, traverse the BK tree to find all words within a Levenshtein distance of 2 from the word.</li>
+<li>Sort these words first by Levenshtein distance from the input word.</li>
+<li>If the word itself is found (ie. Levenshtein distance is 0), no correction is necessary.</li>
+<li>Otherwise, choose the word with the lowest Levenshtein distance and highest frequency.</li>
+</ul>
+
+<h2>
+<a id="behavior" class="anchor" href="#behavior" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Behavior:</h2>
+
+<p>For the vast majority of misspellings, the Norvig corrector and the BK Tree corrector will produce the same suggested correction. However, the behavior of the BK Tree  corrector is slightly different from the Norvig corrector because of the use of Levenshtein distance rather than edit distance. In particular, transposing letters adds 2 to the Levenshtein distance, whereas it only adds 1 to the edit distance. Thus, in the case where the Norvig corrector suggests a correction of transposing two letters for an edit distance of 1, the BK tree corrector might suggest a different correction with a Levenshtein distance of 1. For example, when <a href="http://www.gutenberg.org/cache/epub/1342/pg1342.txt">this file</a> is used as the training file, the BK Tree corrector will suggest that 'fera' be corrected to 'her'. The Norvig corrector, though, will suggest that 'fera' be corrected to 'fear'. In this case, the edit distance from 'fera' to 'fear' is 1 (transpose a and r) but the Levenshtein distance is 2. Therefore, the Norvig corrector chooses the most common word of edit distance 1 ('fear'), but the BK Tree corrector does not find any corrections of Levenshtein distance 1, so it chooses the most common word of Levenshtein distance 2 ('her').</p>
+
+<h2>
+<a id="performance" class="anchor" href="#performance" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Performance:</h2>
+
+<p>Based on running the programs on a few different files, it appears that the Norvig spelling corrector goes through the training phase faster, but is slower at the correcting misspelled worse (particularly when the misspelled word is relatively long and requires going to the second level of edits in order to find a correction). The BK Tree is slower in the training phase, but faster at making corrections for misspelled words.</p>
+
+<p>This would make sense because in the training phase, the Norvig corrector is simply inserting into and updating a Hashmap, while the BK Tree corrector is constructing a tree. However, in the correction phase, the Norvig corrector must first generate all possible edits and then check for them in the hashmap, whereas the BK Tree corrector traverses the tree based on the word itself without having to generate any possible edits.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/kevinwilde/spelling_correctors/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/kevinwilde/spelling_correctors/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/kevinwilde/spelling_correctors"></a> is maintained by <a href="https://github.com/kevinwilde">kevinwilde</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
